@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/services.dart';
 import '../../model/artwork_model.dart';
 
@@ -10,11 +9,10 @@ class AssetLibraryDataSource {
 
   /// Đọc toàn bộ ảnh trong assets
   static Future<List<ArtworkModel>> loadArtworks() async {
-    final manifest = await rootBundle.loadString('AssetManifest.json');
+    final assetManifest = await AssetManifest.loadFromAssetBundle(rootBundle);
+    final List<String> assets = assetManifest.listAssets();
 
-    final Map<String, dynamic> manifestMap = json.decode(manifest);
-
-    final imagePaths = manifestMap.keys
+    final imagePaths = assets
         .where((path) => path.startsWith(_rootFolder))
         .where(
           (path) =>

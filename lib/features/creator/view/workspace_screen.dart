@@ -1,4 +1,7 @@
 import 'dart:io';
+import 'dart:ui' as ui;
+import 'dart:typed_data';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
@@ -25,6 +28,12 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
   int _selectedToolIndex = 2; // Default to 'Cọ lớn' (index 2)
   double _sliderValue = 0.5;
   int _selectedColorIndex = 3; // Default to the light blue in row 1
+  
+  int _imageWidth = 1;
+  int _imageHeight = 1;
+  bool _isPanMode = false;
+  final List<DrawingPath> _paths = [];
+  DrawingPath? _currentPath;
 
   final List<Color> _colors = [
     // Row 1
@@ -61,14 +70,16 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
       final fileName = 'bw_${DateTime.now().millisecondsSinceEpoch}_${p.basename(_currentImagePath)}';
       final savedImagePath = p.join(appDir.path, fileName);
       
-      final imageBytes = await File(_currentImagePath).readAsBytes();
+      final imageBytes = await _getBytes(_currentImagePath);
       final decodedImage = img.decodeImage(imageBytes);
       if (decodedImage != null) {
+        _imageWidth = decodedImage.width;
+        _imageHeight = decodedImage.height;
         final grayscaleImage = img.grayscale(decodedImage);
         final encodedImage = img.encodeJpg(grayscaleImage);
         await File(savedImagePath).writeAsBytes(encodedImage);
       } else {
-        await File(_currentImagePath).copy(savedImagePath);
+        await File(savedImagePath).writeAsBytes(imageBytes);
       }
       
       _currentImagePath = savedImagePath;
@@ -91,11 +102,26 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
           createdAt: DateTime.now().millisecondsSinceEpoch,
         );
       }
+      final imageBytes = await _getBytes(_currentImagePath);
+      final decodedImage = img.decodeImage(imageBytes);
+      if (decodedImage != null) {
+        _imageWidth = decodedImage.width;
+        _imageHeight = decodedImage.height;
+      }
     }
 
     setState(() {
       _isLoading = false;
     });
+  }
+
+  Future<Uint8List> _getBytes(String path) async {
+    if (path.startsWith('assets/')) {
+      final byteData = await rootBundle.load(path);
+      return byteData.buffer.asUint8List();
+    } else {
+      return await File(path).readAsBytes();
+    }
   }
 
   Future<void> _markAsCompleted() async {
@@ -165,13 +191,53 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
                   ),
                   clipBehavior: Clip.antiAlias,
                   child: InteractiveViewer(
-                    minScale: 0.5,
-                    maxScale: 4.0,
+                    panEnabled: _isPanMode,
+                    scaleEnabled: true,
+                    minScale: 0.1,
+                    maxScale: 10.0,
                     child: Center(
-                      child: Image.file(
-                        File(_currentImagePath),
-                        fit: BoxFit.contain,
-                      ),
+                      child: _imageWidth > 1
+                          ? AspectRatio(
+                              aspectRatio: _imageWidth / _imageHeight,
+                              child: Stack(
+                                fit: StackFit.expand,
+                                children: [
+                                  Image.file(
+                                    File(_currentImagePath),
+                                    fit: BoxFit.fill,
+                                  ),
+                                  GestureDetector(
+                                    onPanStart: _isPanMode ? null : (details) {
+                                      setState(() {
+                                        _currentPath = DrawingPath(
+                                          points: [details.localPosition],
+                                          color: _colors[_selectedColorIndex],
+                                          strokeWidth: _sliderValue * 40 + 2,
+                                          isEraser: _selectedToolIndex == 1,
+                                        );
+                                        _paths.add(_currentPath!);
+                                      });
+                                    },
+                                    onPanUpdate: _isPanMode ? null : (details) {
+                                      setState(() {
+                                        _currentPath?.points.add(details.localPosition);
+                                      });
+                                    },
+                                    onPanEnd: _isPanMode ? null : (details) {
+                                      _currentPath = null;
+                                    },
+                                    child: CustomPaint(
+                                      painter: DrawingPainter(_paths),
+                                      size: Size.infinite,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : Image.file(
+                              File(_currentImagePath),
+                              fit: BoxFit.contain,
+                            ),
                     ),
                   ),
                 ),
@@ -505,7 +571,18 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
             ),
           ),
           
-          _buildToolbarButton(Icons.open_in_full, iconColor: Colors.black54),
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                _isPanMode = !_isPanMode;
+              });
+            },
+            child: _buildToolbarButton(
+              _isPanMode ? Icons.draw : Icons.open_in_full,
+              iconColor: _isPanMode ? Theme.of(context).primaryColorDark : Colors.black54,
+              backgroundColor: _isPanMode ? Theme.of(context).primaryColorLight : Theme.of(context).cardColor,
+            ),
+          ),
         ],
       ),
     );
@@ -532,5 +609,58 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
         color: color,
       ),
     );
+  }
+}
+
+class DrawingPath {
+  final List<Offset> points;
+  final Color color;
+  final double strokeWidth;
+  final bool isEraser;
+
+  DrawingPath({
+    required this.points,
+    required this.color,
+    required this.strokeWidth,
+    this.isEraser = false,
+  });
+}
+
+class DrawingPainter extends CustomPainter {
+  final List<DrawingPath> paths;
+
+  DrawingPainter(this.paths);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.saveLayer(Rect.fromLTWH(0, 0, size.width, size.height), Paint());
+
+    for (final path in paths) {
+      final paint = Paint()
+        ..color = path.isEraser ? Colors.transparent : path.color
+        ..strokeWidth = path.strokeWidth
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round
+        ..style = PaintingStyle.stroke
+        ..blendMode = path.isEraser ? BlendMode.clear : BlendMode.srcOver;
+
+      if (path.points.length == 1) {
+        canvas.drawPoints(ui.PointMode.points, [path.points.first], paint);
+      } else if (path.points.length > 1) {
+        final pathObj = Path();
+        pathObj.moveTo(path.points.first.dx, path.points.first.dy);
+        for (int i = 1; i < path.points.length; i++) {
+          pathObj.lineTo(path.points[i].dx, path.points[i].dy);
+        }
+        canvas.drawPath(pathObj, paint);
+      }
+    }
+
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant DrawingPainter oldDelegate) {
+    return true;
   }
 }

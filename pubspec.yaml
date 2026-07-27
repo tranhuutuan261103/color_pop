@@ -78,6 +78,15 @@ flutter:
     - assets/icons/
     - assets/images/avatars/
     - assets/images/categories/
+    - assets/images/categories/forbaby/
+    - assets/images/categories/forbaby/alphabets/
+    - assets/images/categories/forbaby/animals/
+    - assets/images/categories/forbaby/cartoons/
+    - assets/images/categories/forbaby/families/
+    - assets/images/categories/forbaby/fruits/
+    - assets/images/categories/forbaby/numbers/
+    - assets/images/categories/forbaby/trends/
+    - assets/images/categories/forbaby/vegetations/
     - assets/images/drawings/
     - assets/mock_data/
 

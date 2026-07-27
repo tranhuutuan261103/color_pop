@@ -20,4 +20,9 @@ class LibraryRepository {
 
     return categories;
   }
+
+  Future<List<ArtworkModel>> getArtworksByCategory(String category) async {
+    final artworks = await getAllArtworks();
+    return artworks.where((e) => e.category == category).toList();
+  }
 }
