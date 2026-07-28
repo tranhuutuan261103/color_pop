@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:image/image.dart' as img;
-import 'package:gal/gal.dart';
 import '../../../core/models/color_project.dart';
 import '../../../core/services/database_helper.dart';
 
@@ -134,27 +133,6 @@ class _WorkspaceScreenState extends State<WorkspaceScreen> {
           const SnackBar(content: Text('Dự án đã được lưu vào Hoàn thành!')),
         );
         Navigator.pop(context);
-      }
-    }
-  }
-
-  Future<void> _saveToGallery() async {
-    try {
-      final hasAccess = await Gal.hasAccess();
-      if (!hasAccess) {
-        await Gal.requestAccess();
-      }
-      await Gal.putImage(_currentImagePath);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Đã lưu ảnh vào Thư viện máy!')),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Lỗi khi lưu ảnh: $e')),
-        );
       }
     }
   }
