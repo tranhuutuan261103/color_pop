@@ -1,0 +1,132 @@
+assets/
+└── images/
+    └── categories/
+        ├── animals/                 (Động vật)
+        │   ├── pets/                (Thú cưng: chó, mèo...)
+        │   ├── wildlife/            (Động vật hoang dã)
+        │   ├── birds/               (Chim chóc)
+        │   ├── marine_life/         (Sinh vật biển)
+        │   └── insects/             (Côn trùng, bướm...)
+        │
+        ├── nature/                  (Thiên nhiên)
+        │   ├── botanical/           (Thực vật, cỏ cây)
+        │   ├── flowers/             (Các loại hoa)
+        │   ├── landscapes/          (Phong cảnh, núi rừng, biển)
+        │   └── space_and_sky/       (Vũ trụ, bầu trời, hành tinh)
+        │
+        ├── patterns/                (Họa tiết - Rất quan trọng cho người lớn)
+        │   ├── mandalas/            (Họa tiết Mandala)
+        │   ├── zentangles/          (Nghệ thuật nét rối Zentangle)
+        │   ├── geometric/           (Hình học)
+        │   └── optical_illusions/   (Ảo ảnh thị giác)
+        │
+        ├── fantasy/                 (Viễn tưởng & Thần thoại)
+        │   ├── mythical_creatures/  (Rồng, kỳ lân, người cá...)
+        │   ├── magic_world/         (Phù thủy, phép thuật, tiên nữ)
+        │   ├── steampunk/           (Phong cách máy móc cổ điển)
+        │   └── sci_fi/              (Khoa học viễn tưởng, robot)
+        │
+        ├── characters/              (Nhân vật & Con người)
+        │   ├── anime_manga/         (Phong cách Anime/Manga)
+        │   ├── chibi/               (Nhân vật dễ thương, đầu to)
+        │   ├── fashion/             (Thời trang, trang phục, makeup)
+        │   └── professions/         (Nghề nghiệp: bác sĩ, cảnh sát...)
+        │
+        ├── lifestyle/               (Đời sống & Sở thích)
+        │   ├── food_and_drinks/     (Đồ ăn, thức uống, bánh ngọt)
+        │   ├── architecture/        (Kiến trúc, nhà cửa, lâu đài)
+        │   ├── vehicles/            (Xe cộ, máy bay, tàu thuyền)
+        │   ├── interiors/           (Nội thất, góc phòng chill)
+        │   └── vintage_retro/       (Đồ cổ, phong cách hoài niệm)
+        │
+        ├── events/                  (Sự kiện & Lễ hội)
+        │   ├── christmas/           (Giáng sinh)
+        │   ├── halloween/           (Halloween)
+        │   ├── lunar_new_year/      (Tết Nguyên Đán)
+        │   └── birthdays/           (Sinh nhật)
+        │
+        ├── kids_basics/             (Giữ lại những cái cơ bản cho bé)
+        │   ├── alphabets/           (Bảng chữ cái)
+        │   ├── numbers/             (Chữ số)
+        │   └── simple_shapes/       (Hình khối cơ bản)
+	│
+	├── typography/              (Chữ nghệ thuật & Trích dẫn)
+        │   ├── inspirational_quotes/(Trích dẫn truyền cảm hứng)
+        │   ├── calligraphy/         (Thư pháp)
+        │   └── graffiti_art/        (Nghệ thuật chữ đường phố)
+        │
+        ├── travel_and_places/       (Du lịch & Địa danh)
+        │   ├── world_landmarks/     (Kỳ quan, danh lam thắng cảnh)
+        │   ├── cityscapes/          (Phong cảnh thành phố)
+        │   └── cultural_outfits/    (Trang phục truyền thống các nước)
+        │
+        ├── sports_and_action/       (Thể thao & Vận động)
+        │   ├── team_sports/         (Bóng đá, bóng rổ, bóng chuyền...)
+        │   ├── extreme_sports/      (Thể thao mạo hiểm: trượt ván, lướt sóng)
+        │   └── martial_arts/        (Võ thuật)
+        │
+        ├── dark_and_gothic/         (Cá tính mạnh, rùng rợn - Rất hot với giới trẻ)
+        │   ├── skulls_and_bones/    (Đầu lâu, xương chéo nghệ thuật)
+        │   ├── monsters/            (Quái vật)
+        │   └── dark_fantasy/        (Viễn tưởng hắc ám)
+        │
+        ├── spirituality/            (Tâm linh, Tôn giáo & Huyền bí)
+        │   ├── zen_and_meditation/  (Thiền định, tư thế yoga)
+        │   ├── religions/           (Biểu tượng tôn giáo: Phật giáo, Thiên chúa...)
+        │   └── astrology_tarot/     (Cung hoàng đạo, bài Tarot, chiêm tinh)
+        │
+        ├── science_and_education/   (Khoa học & Khám phá)
+        │   ├── anatomy/             (Giải phẫu học nghệ thuật: trái tim, não bộ)
+        │   ├── machinery_parts/     (Chi tiết máy móc, vi mạch)
+        │   └── micro_world/         (Thế giới vi mô: vi khuẩn, phân tử dễ thương)
+	│
+	├── tattoo_art/              (Nghệ thuật Xăm hình - Cực kỳ hút khách người lớn)
+        │   ├── traditional_tattoo/  (Xăm truyền thống Old School Âu Mỹ)
+        │   ├── tribal_and_maori/    (Họa tiết bộ lạc, chiến binh)
+        │   └── japanese_irezumi/    (Xăm Nhật Bản: cá chép, mặt quỷ, hoa anh đào)
+        │
+        ├── music_and_arts/          (Âm nhạc & Nghệ thuật biểu diễn)
+        │   ├── musical_instruments/ (Nhạc cụ: Piano, guitar, trống, violin...)
+        │   ├── dance_styles/        (Vũ đạo: Ballet, hip-hop, tango, múa dân gian)
+        │   └── theater_and_drama/   (Mặt nạ tuồng, sân khấu kịch, xiếc)
+        │
+        ├── history_and_eras/        (Lịch sử & Các thời kỳ huy hoàng)
+        │   ├── ancient_world/       (Ai Cập, Hy Lạp, La Mã cổ đại)
+        │   ├── medieval_times/      (Thời trung cổ, hiệp sĩ, thành quách)
+        │   └── wild_west/           (Miền Tây hoang dã, cao bồi)
+        │
+        ├── fairytales_and_stories/  (Truyện cổ tích & Văn học)
+        │   ├── alice_in_wonderland/ (Alice ở xứ sở thần tiên - Thể loại kinh điển của app tô màu)
+        │   ├── classic_fables/      (Truyện ngụ ngôn, thần thoại Grimm)
+        │   └── book_illustrations/  (Tranh minh họa sách, phong cách cổ điển)
+        │
+        ├── abstract_and_surreal/    (Trừu tượng & Siêu thực - Dành cho tư duy phá cách)
+        │   ├── fluid_art/           (Nghệ thuật dòng chảy, loang màu)
+        │   ├── dreamscapes/         (Phong cảnh trong mơ, phi logic kiểu Salvador Dalí)
+        │   └── cubism/              (Trường phái lập thể, các khối hình ghép lại)
+	│
+	├── careers_and_professions/ (Ngành nghề & Công việc - Tách riêng thành mục lớn)
+        │   ├── healthcare/          (Y tế: bác sĩ, y tá, dược sĩ)
+        │   ├── public_safety/       (An ninh: cảnh sát, lính cứu hỏa)
+        │   ├── education/           (Giáo dục: giáo viên, giảng viên)
+        │   ├── construction/        (Xây dựng: kỹ sư, thợ mỏ, kiến trúc sư)
+        │   └── agriculture/         (Nông nghiệp: nông dân, kỹ sư nông nghiệp)
+        │
+        ├── world_and_nations/       (Thế giới & Quốc gia)
+        │   ├── national_flags/      (Quốc kỳ các nước trên thế giới)
+        │   ├── world_maps/          (Bản đồ thế giới, bản đồ các châu lục/quốc gia)
+        │   ├── traditional_costumes/ (Quốc phục: Áo dài, Kimono, Hanbok...)
+        │   └── cultural_symbols/    (Biểu tượng quốc gia: Tượng Nữ thần tự do, tháp Eiffel)
+        │
+        ├── military_and_forces/     (Quân đội & Lực lượng vũ trang)
+        │   ├── army/                (Lục quân, bộ đội, lính bộ binh)
+        │   ├── navy/                (Hải quân, lính thủy đánh bộ, tàu chiến)
+        │   ├── air_force/           (Không quân, phi công, máy bay chiến đấu)
+        │   └── special_forces/      (Đặc nhiệm, lính dù)
+        │
+        └── vietnamese_heritage/     (Văn hóa & Lịch sử Việt Nam - Chuyên mục nội địa hóa)
+            ├── historical_figures/  (Nhân vật lịch sử: Hai Bà Trưng, Trần Hưng Đạo...)
+            ├── patriotic_themes/    (Chủ đề yêu nước: Bộ đội Cụ Hồ, thanh niên xung phong)
+            ├── folklore_and_myths/  (Truyện cổ tích & Truyền thuyết: Thánh Gióng, Sơn Tinh...)
+            ├── traditional_festivals/ (Lễ hội truyền thống: Múa lân, đua thuyền, giỗ Tổ)
+            └── daily_life_past/     (Đời sống xưa: Làng quê Bắc Bộ, chợ nổi miền Tây...)

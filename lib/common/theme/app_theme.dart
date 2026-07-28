@@ -65,7 +65,7 @@ class AppTheme {
   static ThemeData get darkTheme {
     return ThemeData(
       brightness: Brightness.dark,
-      primaryColor: AppColors.primaryPink, // Assuming dark theme keeps pink
+      primaryColor: AppColors.primaryPink, 
       primaryColorDark: AppColors.primaryDarkPink,
       scaffoldBackgroundColor: AppColors.backgroundDark,
       cardColor: AppColors.cardDark,

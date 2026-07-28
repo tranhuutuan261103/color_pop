@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../common/constants/app_colors.dart';
-import '../model/artwork_model.dart';
+import '../../../core/models/artwork_model.dart';
 
 class ArtworkGridCard extends StatelessWidget {
   final ArtworkModel artwork;

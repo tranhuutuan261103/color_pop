@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../common/constants/app_colors.dart';
-import '../data/repository/library_repository.dart';
-import '../model/artwork_model.dart';
-import '../../creator/view/workspace_screen.dart';
+import '../../../core/repository/library_repository.dart';
+import '../../../core/models/artwork_model.dart';
+import '../widgets/artwork_card.dart'; 
 
 class CategoryArtworksScreen extends StatefulWidget {
   final String categoryRaw;
@@ -20,6 +19,7 @@ class CategoryArtworksScreen extends StatefulWidget {
 
 class _CategoryArtworksScreenState extends State<CategoryArtworksScreen> {
   final LibraryRepository _repository = const LibraryRepository();
+  
   List<ArtworkModel> _artworks = [];
   bool _isLoading = true;
 
@@ -29,6 +29,7 @@ class _CategoryArtworksScreenState extends State<CategoryArtworksScreen> {
     _loadArtworks();
   }
 
+  // Lấy danh sách ảnh dựa theo categoryRaw được truyền vào từ màn hình trước
   Future<void> _loadArtworks() async {
     try {
       final artworks = await _repository.getArtworksByCategory(widget.categoryRaw);
@@ -51,13 +52,15 @@ class _CategoryArtworksScreenState extends State<CategoryArtworksScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      
+      // AppBar tùy chỉnh, hiển thị Icon và Tên của Danh mục ở giữa
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: IconThemeData(color: Theme.of(context).primaryColorDark),
         centerTitle: true,
         title: Row(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: MainAxisSize.min, // Thu gọn Row vừa bằng nội dung để can giữa chính xác
           children: [
             Text(
               widget.visuals['icon'],
@@ -75,7 +78,9 @@ class _CategoryArtworksScreenState extends State<CategoryArtworksScreen> {
           ],
         ),
       ),
+      
       body: SafeArea(
+        // Xử lý 3 trạng thái: Đang tải -> Rỗng -> Có dữ liệu
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : _artworks.isEmpty
@@ -86,133 +91,18 @@ class _CategoryArtworksScreenState extends State<CategoryArtworksScreen> {
                       crossAxisCount: 2,
                       crossAxisSpacing: 14,
                       mainAxisSpacing: 14,
-                      childAspectRatio: 0.8,
+                      childAspectRatio: 0.8, // Căn chỉnh tỷ lệ chiều rộng/cao của thẻ Artwork
                     ),
                     itemCount: _artworks.length,
                     itemBuilder: (context, index) {
                       final artwork = _artworks[index];
-                      return _buildArtworkCard(artwork);
+                      // Sử dụng Widget đã được tách ra, code rất gọn gàng
+                      return ArtworkCard(
+                        artwork: artwork,
+                        visuals: widget.visuals,
+                      );
                     },
                   ),
-      ),
-    );
-  }
-
-  Widget _buildArtworkCard(ArtworkModel artwork) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => WorkspaceScreen(imagePath: artwork.imagePath),
-          ),
-        );
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 16,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Stack(
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(
-                  child: Container(
-                    color: widget.visuals['color'],
-                    child: Image.asset(
-                      artwork.imagePath,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Center(
-                          child: Icon(
-                            Icons.broken_image,
-                            color: Colors.grey.withOpacity(0.5),
-                            size: 40,
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        artwork.title,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          color: Theme.of(context).primaryColorDark,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        widget.visuals['title'],
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: AppColors.secondaryText,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-
-            // Bookmark icon
-            Positioned(
-              top: 12,
-              left: 12,
-              child: Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor.withOpacity(0.9),
-                  shape: BoxShape.circle,
-                ),
-                alignment: Alignment.center,
-                child: const Text('🔖', style: TextStyle(fontSize: 14)),
-              ),
-            ),
-
-            if (artwork.isNew || artwork.isHot)
-              Positioned(
-                top: 12,
-                right: 12,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    artwork.isNew ? 'NEW' : 'HOT',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
       ),
     );
   }

@@ -75,11 +75,53 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
+    - assets/fonts/
     - assets/icons/
+    - assets/images/
+    - assets/mock_data/
     - assets/images/avatars/
     - assets/images/categories/
+    - assets/images/drawings/
+    - assets/images/categories/abstract_and_surreal/
+    - assets/images/categories/abstract_and_surreal/cubism/
+    - assets/images/categories/abstract_and_surreal/dreamscapes/
+    - assets/images/categories/abstract_and_surreal/fluid_art/
+    - assets/images/categories/animals/
+    - assets/images/categories/animals/birds/
+    - assets/images/categories/animals/insects/
+    - assets/images/categories/animals/marine_life/
+    - assets/images/categories/animals/pets/
+    - assets/images/categories/animals/wildlife/
+    - assets/images/categories/careers_and_professions/
+    - assets/images/categories/careers_and_professions/agriculture/
+    - assets/images/categories/careers_and_professions/construction/
+    - assets/images/categories/careers_and_professions/education/
+    - assets/images/categories/careers_and_professions/healthcare/
+    - assets/images/categories/careers_and_professions/public_safety/
+    - assets/images/categories/characters/
+    - assets/images/categories/characters/anime_manga/
+    - assets/images/categories/characters/chibi/
+    - assets/images/categories/characters/fashion/
+    - assets/images/categories/characters/professions/
+    - assets/images/categories/dark_and_gothic/
+    - assets/images/categories/dark_and_gothic/dark_fantasy/
+    - assets/images/categories/dark_and_gothic/monsters/
+    - assets/images/categories/dark_and_gothic/skulls_and_bones/
+    - assets/images/categories/events/
+    - assets/images/categories/events/birthdays/
+    - assets/images/categories/events/christmas/
+    - assets/images/categories/events/halloween/
+    - assets/images/categories/events/lunar_new_year/
+    - assets/images/categories/fairytales_and_stories/
+    - assets/images/categories/fairytales_and_stories/alice_in_wonderland/
+    - assets/images/categories/fairytales_and_stories/book_illustrations/
+    - assets/images/categories/fairytales_and_stories/classic_fables/
+    - assets/images/categories/fantasy/
+    - assets/images/categories/fantasy/magic_world/
+    - assets/images/categories/fantasy/mythical_creatures/
+    - assets/images/categories/fantasy/sci_fi/
+    - assets/images/categories/fantasy/steampunk/
     - assets/images/categories/forbaby/
-    - assets/images/categories/forbaby/alphabets/
     - assets/images/categories/forbaby/animals/
     - assets/images/categories/forbaby/cartoons/
     - assets/images/categories/forbaby/families/
@@ -87,8 +129,75 @@ flutter:
     - assets/images/categories/forbaby/numbers/
     - assets/images/categories/forbaby/trends/
     - assets/images/categories/forbaby/vegetations/
-    - assets/images/drawings/
-    - assets/mock_data/
+    - assets/images/categories/forme/
+    - assets/images/categories/history_and_eras/
+    - assets/images/categories/history_and_eras/ancient_world/
+    - assets/images/categories/history_and_eras/medieval_times/
+    - assets/images/categories/history_and_eras/wild_west/
+    - assets/images/categories/kids_basics/
+    - assets/images/categories/kids_basics/alphabets/
+    - assets/images/categories/kids_basics/numbers/
+    - assets/images/categories/kids_basics/simple_shapes/
+    - assets/images/categories/lifestyle/
+    - assets/images/categories/lifestyle/architecture/
+    - assets/images/categories/lifestyle/food_and_drinks/
+    - assets/images/categories/lifestyle/interiors/
+    - assets/images/categories/lifestyle/vehicles/
+    - assets/images/categories/lifestyle/vintage_retro/
+    - assets/images/categories/military_and_forces/
+    - assets/images/categories/military_and_forces/air_force/
+    - assets/images/categories/military_and_forces/army/
+    - assets/images/categories/military_and_forces/navy/
+    - assets/images/categories/military_and_forces/special_forces/
+    - assets/images/categories/music_and_arts/
+    - assets/images/categories/music_and_arts/dance_styles/
+    - assets/images/categories/music_and_arts/musical_instruments/
+    - assets/images/categories/music_and_arts/theater_and_drama/
+    - assets/images/categories/nature/
+    - assets/images/categories/nature/botanical/
+    - assets/images/categories/nature/flowers/
+    - assets/images/categories/nature/landscapes/
+    - assets/images/categories/nature/space_and_sky/
+    - assets/images/categories/patterns/
+    - assets/images/categories/patterns/geometric/
+    - assets/images/categories/patterns/mandalas/
+    - assets/images/categories/patterns/optical_illusions/
+    - assets/images/categories/patterns/zentangles/
+    - assets/images/categories/science_and_education/
+    - assets/images/categories/science_and_education/anatomy/
+    - assets/images/categories/science_and_education/machinery_parts/
+    - assets/images/categories/science_and_education/micro_world/
+    - assets/images/categories/spirituality/
+    - assets/images/categories/spirituality/astrology_tarot/
+    - assets/images/categories/spirituality/religions/
+    - assets/images/categories/spirituality/zen_and_meditation/
+    - assets/images/categories/sports_and_action/
+    - assets/images/categories/sports_and_action/extreme_sports/
+    - assets/images/categories/sports_and_action/martial_arts/
+    - assets/images/categories/sports_and_action/team_sports/
+    - assets/images/categories/tattoo_art/
+    - assets/images/categories/tattoo_art/japanese_irezumi/
+    - assets/images/categories/tattoo_art/traditional_tattoo/
+    - assets/images/categories/tattoo_art/tribal_and_maori/
+    - assets/images/categories/travel_and_places/
+    - assets/images/categories/travel_and_places/cityscapes/
+    - assets/images/categories/travel_and_places/cultural_outfits/
+    - assets/images/categories/travel_and_places/world_landmarks/
+    - assets/images/categories/typography/
+    - assets/images/categories/typography/calligraphy/
+    - assets/images/categories/typography/graffiti_art/
+    - assets/images/categories/typography/inspirational_quotes/
+    - assets/images/categories/vietnamese_heritage/
+    - assets/images/categories/vietnamese_heritage/daily_life_past/
+    - assets/images/categories/vietnamese_heritage/folklore_and_myths/
+    - assets/images/categories/vietnamese_heritage/historical_figures/
+    - assets/images/categories/vietnamese_heritage/patriotic_themes/
+    - assets/images/categories/vietnamese_heritage/traditional_festivals/
+    - assets/images/categories/world_and_nations/
+    - assets/images/categories/world_and_nations/cultural_symbols/
+    - assets/images/categories/world_and_nations/national_flags/
+    - assets/images/categories/world_and_nations/traditional_costumes/
+    - assets/images/categories/world_and_nations/world_maps/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
