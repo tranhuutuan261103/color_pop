@@ -16,7 +16,6 @@ class MyApp extends StatelessWidget {
           switch (themeProvider.appThemeMode) {
             case AppThemeMode.light2:
               return AppTheme.lightTheme2;
-
             case AppThemeMode.light1:
             case AppThemeMode.system:
             case AppThemeMode.dark:
