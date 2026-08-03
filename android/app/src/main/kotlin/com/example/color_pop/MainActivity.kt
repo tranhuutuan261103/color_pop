@@ -1,55 +1,22 @@
-package com.example.color_pop 
+package com.example.color_pop
 
 import androidx.annotation.NonNull
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
-import io.flutter.plugin.common.MethodChannel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
+/// [MainActivity]
+/// Điểm neo (Entry point) của ứng dụng trên hệ điều hành Android.
+/// Chịu trách nhiệm khởi chạy Flutter Engine và gắn kết các module Native (Kotlin/C++).
 class MainActivity: FlutterActivity() {
-    // Tên kênh giao tiếp (phải khớp với tên khai báo bên Dart)
-    private val CHANNEL = "com.fau.color_pop/image_processor"
-
+    // Hàm này được gọi tự động khi FlutterEngine vừa khởi tạo xong, 
+    // trước khi giao diện Dart (Flutter UI) được vẽ lên màn hình.
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
+        // Luôn phải gọi super để giữ lại các cài đặt mặc định của Flutter framework
         super.configureFlutterEngine(flutterEngine)
         
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
-            when (call.method) {
-                // Nhận lệnh xử lý Grayscale
-                "processGrayscale" -> {
-                    val inputPath = call.argument<String>("inputPath")
-                    val outputPath = call.argument<String>("outputPath")
-                    
-                    if (inputPath != null && outputPath != null) {
-                        CoroutineScope(Dispatchers.Main).launch {
-                            val success = ImageProcessor.processGrayscaleAndSave(inputPath, outputPath)
-                            if (success) result.success(true) else result.error("ERROR", "Failed to process image", null)
-                        }
-                    } else {
-                        result.error("INVALID_ARGS", "Missing paths", null)
-                    }
-                }
-                
-                // Nhận lệnh trích xuất mặt nạ viền
-                "buildOutlineMask" -> {
-                    val inputPath = call.argument<String>("inputPath")
-                    val threshold = call.argument<Int>("threshold") ?: 140
-                    
-                    if (inputPath != null) {
-                        CoroutineScope(Dispatchers.Main).launch {
-                            val mask = ImageProcessor.buildOutlineMask(inputPath, threshold)
-                            if (mask != null) result.success(mask) else result.error("ERROR", "Failed to build mask", null)
-                        }
-                    } else {
-                        result.error("INVALID_ARGS", "Missing path", null)
-                    }
-                }
-                
-                else -> result.notImplemented()
-            }
-        }
+        // [Gắn cầu nối MethodChannel]
+        // Đăng ký các Native API (như xử lý ảnh, dò viền) vào FlutterEngine.
+        // Giúp file workspace_logic.dart có thể gọi invokeMethod() xuống Android.
+        NativeBridge.register(flutterEngine)
     }
 }
