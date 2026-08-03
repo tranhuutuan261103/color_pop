@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -28,12 +29,20 @@ class _AppearanceContent extends StatefulWidget {
 
 class _AppearanceContentState extends State<_AppearanceContent> {
   late AppThemeMode _localThemeMode;
+  Timer? _debounceTimer;
 
   @override
   void initState() {
     super.initState();
     // Lấy theme hiện tại ngay khi vừa mở BottomSheet (chỉ lấy 1 lần, không dùng listen)
     _localThemeMode = context.read<ThemeProvider>().appThemeMode;
+  }
+
+  @override
+  void dispose() {
+    // Hủy timer nếu BottomSheet đóng lại để tránh lỗi memory leak
+    _debounceTimer?.cancel();
+    super.dispose();
   }
 
   void _handleThemeChange(AppThemeMode mode) {
@@ -44,8 +53,13 @@ class _AppearanceContentState extends State<_AppearanceContent> {
       _localThemeMode = mode;
     });
 
-    // 2. Trì hoãn việc rebuild toàn App khoảng 150ms để nhường chỗ cho Animation
-    Future.delayed(const Duration(milliseconds: 150), () {
+    // 2. Kỹ thuật Debounce: Hủy lệnh cũ nếu người dùng bấm quá nhanh
+    if (_debounceTimer?.isActive ?? false) {
+      _debounceTimer!.cancel();
+    }
+
+    // 3. Đặt lệnh mới. Chỉ khi người dùng DỪNG bấm 250ms thì mới đổi theme toàn App
+    _debounceTimer = Timer(const Duration(milliseconds: 250), () {
       if (mounted) {
         context.read<ThemeProvider>().setThemeMode(mode);
       }

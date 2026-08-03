@@ -61,8 +61,9 @@ class ThemeProvider with ChangeNotifier {
     _appThemeMode = mode;
     notifyListeners();
 
-    // Lưu thiết lập mới xuống bộ nhớ thiết bị.
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_themeKey, mode.toString());
+    // Lưu thiết lập mới xuống bộ nhớ thiết bị không cần dùng 'await' để tránh chặn luồng
+    SharedPreferences.getInstance().then((prefs) {
+      prefs.setString(_themeKey, mode.toString());
+    });
   }
 }
