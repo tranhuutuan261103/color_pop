@@ -7,6 +7,7 @@
 nó chỉ gọi qua ImageProcessor. */
 
 package com.example.color_pop.engine
+
 import android.graphics.Bitmap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -18,22 +19,25 @@ import kotlinx.coroutines.withContext
  * và tối ưu hóa bộ nhớ RAM.
  */
 object ImageProcessor {
-    // LƯU TRỮ RAM (STATE)
-    private var activeBitmap: Bitmap? = null
-    private var outlineMask: ByteArray? = null
+    // LƯU TRỮ RAM (STATE) - Biến global quản lý ảnh hiện tại
+    var activeBitmap: Bitmap? = null // Bỏ private để các engine khác truy cập nếu cần
+    var outlineMask: ByteArray? = null // Bỏ private để FloodFill có thể kiểm tra viền
     var activeWidth = 0
     var activeHeight = 0
 
     // 1. Load ảnh vào RAM (Dùng khi mở Project cũ hoặc load ảnh mới)
     suspend fun loadProjectToRAM(path: String): ByteArray? = withContext(Dispatchers.IO) {
-        activeBitmap?.recycle()
-        activeBitmap = BitmapLoader.load(path)
-        if (activeBitmap == null) return@withContext null
+        activeBitmap?.recycle() // Xóa ảnh cũ để tránh rò rỉ bộ nhớ
+        
+        // Cần đảm bảo Bitmap tạo ra là Mutable (có thể vẽ lên được)
+        val loadedBitmap = BitmapLoader.load(path) ?: return@withContext null
+        activeBitmap = loadedBitmap.copy(Bitmap.Config.ARGB_8888, true)
+        loadedBitmap.recycle()
         
         activeWidth = activeBitmap!!.width
         activeHeight = activeBitmap!!.height
 
-        // Tự động tạo Mask viền đen lưu lại để dùng cho Smart Brush
+        // Tự động tạo Mask viền đen lưu lại để dùng cho Smart Brush và Flood Fill
         outlineMask = OutlineMaskBuilder.build(activeBitmap!!, 120, false)
 
         // Trả về ByteArray (chuẩn PNG/JPEG) cho Flutter hiển thị
@@ -41,26 +45,21 @@ object ImageProcessor {
     }
 
     // 2. Chuyển đổi đen trắng & Trả về thông tin đầy đủ cho Flutter
-    // Sử dụng 'suspend' để chạy bất đồng bộ, không làm đơ giao diện Flutter.
     suspend fun processGrayscale(inputPath: String, outputPath: String): Map<String, Any>? {
-        // Tải ảnh an toàn qua BitmapLoader, nếu lỗi (file hỏng, hết RAM) trả về null để báo lỗi lên UI
         val bitmap = BitmapLoader.load(inputPath) ?: return null
         val width = bitmap.width
         val height = bitmap.height
         
-        // Rút toàn bộ điểm ảnh (pixels) ra một mảng Int Array độc lập
         val pixels = BitmapCache.getPixelsFromBitmap(bitmap)
-        bitmap.recycle() // Xóa bitmap ngay lập tức
-        // Từ lúc này, ta chỉ thao tác với mảng 'pixels'.
+        bitmap.recycle()
 
-        // Xử lý trắng đen trực tiếp trên mảng gốc (In-place) để không tốn thêm bộ nhớ
         GrayScaleProcessor.processInPlace(pixels)
         
-        // Lưu mảng pixel đã xử lý xuống file ở ổ cứng
         val saved = BitmapSaver.saveFromPixels(pixels, width, height, outputPath)
+        BitmapCache.releaseIntArray(pixels) // Trả mảng về Pool
+        
         if (!saved) return null
 
-        // Trả về Map chứa đường dẫn và kích thước để Flutter không phải tự đọc lại file
         return mapOf(
             "path" to outputPath,
             "width" to width,
@@ -68,12 +67,9 @@ object ImageProcessor {
         )
     }
 
-    // 3. Lấy thông tin kích thước ảnh (Cho trường hợp mở lại Project cũ)
-    // Ép chạy ngầm ở luồng I/O (chuyên đọc ghi file) để tối ưu
+    // 3. Lấy thông tin kích thước ảnh (Chỉ đọc Header EXIF)
     suspend fun getImageInfo(path: String): Map<String, Int>? = withContext(Dispatchers.IO) {
         try {
-            // [TỐI ƯU]: Chỉ đọc Header (EXIF) của file để lấy kích thước thay vì load cả bức ảnh.
-            // Tốc độ phản hồi cực nhanh (~0.001s) và không tốn RAM.
             val bounds = ImageScaler.getImageBounds(path)
             mapOf(
                 "width" to bounds.first,
@@ -87,42 +83,83 @@ object ImageProcessor {
 
     // 4. Trích xuất mảng đường viền (Outline Mask)
     suspend fun buildOutlineMask(inputPath: String, threshold: Int): ByteArray? {
-        // Load ảnh cần lấy viền
         val bitmap = BitmapLoader.load(inputPath) ?: return null
-        // Giao việc xử lý cho Computer Vision
         val mask = OutlineMaskBuilder.build(bitmap, threshold, applyBlur = true)
-        bitmap.recycle() // Thu dọn RAM ngay lập tức
+        bitmap.recycle()
         return mask
     }
 
-    // Quản lý layer ảo dưới Native (Giả định bạn có 1 mảng lưu ảnh đang vẽ)
-    var currentActiveLayerPixels: IntArray? = null
-    var currentLayerWidth: Int = 0
-    var currentLayerHeight: Int = 0
+    // =========================================================================
+    // NHÓM 5 CÔNG CỤ VẼ 
+    // Mọi công cụ giờ đây sẽ vẽ TRỰC TIẾP lên activeBitmap trên RAM
+    // và trả về ngay file ByteArray cho Flutter hiển thị chớp nhoáng
+    // =========================================================================
 
-    // Khởi tạo Layer (Gọi khi người dùng vừa load ảnh xong)
-    fun initActiveLayer(pixels: IntArray, w: Int, h: Int) {
-        currentActiveLayerPixels = pixels
-        currentLayerWidth = w
-        currentLayerHeight = h
-    }
-
-    // 5. Vẽ nét cọ (Brush Stroke) hoặc Cục tẩy (Eraser) lên lớp ảnh đang thao tác.
-    suspend fun applyBrushStroke(points: DoubleArray, color: Int, radius: Float, isEraser: Boolean): Boolean {
-        val pixels = currentActiveLayerPixels ?: return false
-        BrushEngine.paintStroke(pixels, currentLayerWidth, currentLayerHeight, points, color, radius, isEraser)
+    // [TÍNH NĂNG 1]: BÚT CHÌ (Vẽ nét tự do)
+    suspend fun applyPencil(points: DoubleArray, color: Int, radius: Float): Boolean {
+        if (activeBitmap == null) return false
+        
+        // Rút pixel ra thao tác
+        val pixels = BitmapCache.getPixelsFromBitmap(activeBitmap!!)
+        
+        // PencilEngine xử lý cập nhật mảng pixel
+        PencilEngine.drawStroke(pixels, activeWidth, activeHeight, points, color, radius)
+        
+        // Gán mảng pixel mới trở lại activeBitmap
+        activeBitmap!!.setPixels(pixels, 0, activeWidth, 0, 0, activeWidth, activeHeight)
+        
+        // Trả mảng nháp về Pool
+        BitmapCache.releaseIntArray(pixels)
         return true
     }
-    
-    // 6. Vẽ nét cọ thông minh (Smart Brush) với thuật toán chọn lọc vùng an toàn
+
+    // [TÍNH NĂNG 2]: TẨY (Làm trong suốt)
+    suspend fun applyEraser(points: DoubleArray, radius: Float): Boolean {
+        if (activeBitmap == null) return false
+        
+        val pixels = BitmapCache.getPixelsFromBitmap(activeBitmap!!)
+        
+        EraserEngine.eraseStroke(pixels, activeWidth, activeHeight, points, radius)
+        
+        activeBitmap!!.setPixels(pixels, 0, activeWidth, 0, 0, activeWidth, activeHeight)
+        BitmapCache.releaseIntArray(pixels)
+        return true
+    }
+
+    // [TÍNH NĂNG 3]: CỌ THÔNG MINH (Chỉ vẽ vùng trống)
+    // Đã xóa tham số isEraser bị thừa
     suspend fun applySmartBrush(
-        points: DoubleArray, color: Int, radius: Float, startX: Int, startY: Int, isEraser: Boolean
+        points: DoubleArray, color: Int, radius: Float, startX: Int, startY: Int
     ): ByteArray? = withContext(Dispatchers.Default) {
         if (activeBitmap == null || outlineMask == null) return@withContext null
 
         SmartBrushEngine.applyBoundedStroke(
             activeBitmap!!, outlineMask!!, activeWidth, activeHeight,
-            points, color, radius, startX, startY, isEraser
+            points, color, radius, startX, startY, false // Ép false vì Tẩy đã tách luồng
+        )
+        
+        return@withContext getEncodedBytes()
+    }
+
+    // [TÍNH NĂNG 4]: THÙNG SƠN (Flood Fill / Loang màu)
+    suspend fun applyFloodFill(startX: Int, startY: Int, color: Int): ByteArray? = withContext(Dispatchers.Default) {
+        if (activeBitmap == null || outlineMask == null) return@withContext null
+
+        FloodFillEngine.applyFill(
+            activeBitmap!!, outlineMask!!, activeWidth, activeHeight, startX, startY, color
+        )
+        
+        return@withContext getEncodedBytes()
+    }
+
+    // [TÍNH NĂNG 5]: BÌNH XỊT (Spray / Airbrush)
+    suspend fun applySpray(
+        points: DoubleArray, color: Int, radius: Float, density: Float
+    ): ByteArray? = withContext(Dispatchers.Default) {
+        if (activeBitmap == null) return@withContext null
+
+        SprayEngine.applySpray(
+            activeBitmap!!, points, color, radius, density
         )
         
         return@withContext getEncodedBytes()
@@ -131,7 +168,7 @@ object ImageProcessor {
     // Nén ảnh đang có trong RAM thành ByteArray để Flutter hiển thị
     private fun getEncodedBytes(): ByteArray {
         val stream = java.io.ByteArrayOutputStream()
-        // Dùng PNG để giữ độ trong suốt
+        // Bắt buộc dùng PNG để hỗ trợ kênh Alpha (Độ trong suốt của màu)
         activeBitmap!!.compress(Bitmap.CompressFormat.PNG, 100, stream)
         return stream.toByteArray()
     }

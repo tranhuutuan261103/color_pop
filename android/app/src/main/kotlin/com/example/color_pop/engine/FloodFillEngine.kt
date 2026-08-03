@@ -1,21 +1,38 @@
 package com.example.color_pop.engine
 
+import android.graphics.Bitmap
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+
 /**
  * Thuật toán Scanline Flood Fill siêu tốc.
  * Không dùng đệ quy (chống StackOverflow).
- * Không tạo Object trong vòng lặp (Zero-allocation).
+ * Lấp kín các viền răng cưa cực tốt.
  */
 object FloodFillEngine {
 
-    fun fill(pixels: IntArray, width: Int, height: Int, startX: Int, startY: Int, fillColor: Int) {
-        val startIndex = startY * width + startX
-        val targetColor = pixels[startIndex]
+    suspend fun applyFill(
+        bitmap: Bitmap,
+        outlineMask: ByteArray, // Vẫn giữ tham số để khớp với ImageProcessor
+        width: Int,
+        height: Int,
+        startX: Int,
+        startY: Int,
+        fillColor: Int
+    ) = withContext(Dispatchers.Default) {
+        
+        if (startX < 0 || startX >= width || startY < 0 || startY >= height) return@withContext
+
+        val pixels = BitmapCache.getPixelsFromBitmap(bitmap)
+        val targetColor = pixels[startY * width + startX]
 
         // Nếu màu bám vào đã giống màu cần tô -> Bỏ qua để tránh lặp vô tận
-        if (targetColor == fillColor) return
+        if (targetColor == fillColor) {
+            BitmapCache.releaseIntArray(pixels)
+            return@withContext
+        }
 
         // Mượn mảng từ Pool để làm Stack (Kích thước an toàn tối đa bằng số pixel)
-        // Stack này sẽ lưu tọa độ X, Y xen kẽ nhau: stack[0]=x, stack[1]=y...
         val stack = BitmapCache.obtainIntArray(width * height)
         var stackPointer = 0
 
@@ -24,7 +41,6 @@ object FloodFillEngine {
         stack[stackPointer++] = startY
 
         while (stackPointer > 0) {
-            // Pop tọa độ Y, X ra
             val y = stack[--stackPointer]
             var x = stack[--stackPointer]
 
@@ -68,7 +84,11 @@ object FloodFillEngine {
             }
         }
 
-        // Dùng xong trả Stack về cho hệ thống
+        // Ghi lại mảng pixel đã tô thành công vào Bitmap
+        bitmap.setPixels(pixels, 0, width, 0, 0, width, height)
+        
+        // Dùng xong trả Stack và Pixels về cho hệ thống
         BitmapCache.releaseIntArray(stack)
+        BitmapCache.releaseIntArray(pixels)
     }
 }

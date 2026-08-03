@@ -12,37 +12,35 @@ package com.example.color_pop
 import com.example.color_pop.engine.ImageProcessor
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.* 
 
 // Lắng nghe yêu cầu từ Flutter (Dart), bóc tách dữ liệu an toàn, 
 // điều phối cho ImageProcessor xử lý và gửi kết quả trả về.
 object NativeBridge {
-    // Tên định danh kênh giao tiếp
+    // Tên định danh kênh giao tiếp phải khớp chính xác với biến platform bên workspace_logic.dart
     private const val CHANNEL = "com.fau.color_pop/image_processor"
 
+    // [KIẾN TRÚC ĐA LUỒNG AN TOÀN]
+    // Tạo một CoroutineScope chung gắn với vòng đời của ứng dụng.
+    // Dispatchers.Main đảm bảo kết quả cuối cùng luôn được trả về UI Thread cho Flutter.
+    // SupervisorJob() giúp nếu 1 tác vụ lỗi thì không làm sập toàn bộ các tác vụ khác.
+    private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+
     fun register(flutterEngine: FlutterEngine) {
-        // Đăng ký bộ lắng nghe sự kiện trên Flutter Engine
-        // Lớp thực hiện việc mở kênh. Nó cần binaryMessenger (hệ thống truyền tin nhị phân của Flutter Engine) và tên kênh (CHANNEL).
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
-            // call.method: Tên hàm mà file workspace_logic.dart (Flutter) gọi
             when (call.method) {
                 
                 // --- LUỒNG 1: XỬ LÝ ẢNH TRẮNG ĐEN ---
                 "processGrayscale" -> {
-                    // 1. Bóc tách tham số. Dùng Elvis operator (?:) để chặn lỗi Null ngay lập tức.
                     val inputPath = call.argument<String>("inputPath") ?: return@setMethodCallHandler result.error("ERR", "Missing inputPath", null)
                     val outputPath = call.argument<String>("outputPath") ?: return@setMethodCallHandler result.error("ERR", "Missing outputPath", null)
                     
-                    // 2. Mở một Coroutine trên luồng chính (Main Thread) để đợi kết quả
-                    // Kỹ thuật Bất đồng bộ với Coroutines
-                    CoroutineScope(Dispatchers.Main).launch {
-                        // Gọi ImageProcessor xử lý (Hàm này chạy ngầm trên Background Thread)
-                        val infoMap = ImageProcessor.processGrayscale(inputPath, outputPath)
-                        // 3. Trả kết quả về cho Flutter UI
+                    scope.launch {
+                        val infoMap = withContext(Dispatchers.Default) {
+                            ImageProcessor.processGrayscale(inputPath, outputPath)
+                        }
                         if (infoMap != null) {
-                            result.success(infoMap) // Trả về dạng Map {path, width, height}
+                            result.success(infoMap)
                         } else {
                             result.error("ERR", "Native error: Unable to process Grayscale", null)
                         }
@@ -53,10 +51,12 @@ object NativeBridge {
                 "getImageInfo" -> {
                     val path = call.argument<String>("path") ?: return@setMethodCallHandler result.error("ERR", "Missing path", null)
                     
-                    CoroutineScope(Dispatchers.Main).launch {
-                        val infoMap = ImageProcessor.getImageInfo(path)
+                    scope.launch {
+                        val infoMap = withContext(Dispatchers.Default) {
+                            ImageProcessor.getImageInfo(path)
+                        }
                         if (infoMap != null) {
-                            result.success(infoMap) // Gửi {width, height} về Flutter
+                            result.success(infoMap)
                         } else {
                             result.error("ERR", "Native error: Unable to read image dimensions.", null)
                         }
@@ -66,14 +66,14 @@ object NativeBridge {
                 // --- LUỒNG 3: DÒ TÌM ĐƯỜNG VIỀN ---
                 "buildOutlineMask" -> {
                     val inputPath = call.argument<String>("inputPath") ?: return@setMethodCallHandler result.error("ERR", "Missing inputPath", null)
-                    // Nếu Flutter không gửi threshold, mặc định dùng 120
                     val threshold = call.argument<Int>("threshold") ?: 120
                     
-                    CoroutineScope(Dispatchers.Main).launch {
-                        // Tính toán mảng 1D chứa các pixel viền ảnh
-                        val maskBytes = ImageProcessor.buildOutlineMask(inputPath, threshold)
+                    scope.launch {
+                        val maskBytes = withContext(Dispatchers.Default) {
+                            ImageProcessor.buildOutlineMask(inputPath, threshold)
+                        }
                         if (maskBytes != null) {
-                            result.success(maskBytes) // maskBytes là ByteArray, truyền thẳng sang Uint8List của Dart rất mượt
+                            result.success(maskBytes) 
                         } else {
                             result.error("ERR", "Native error: Unable to extract outline mask.", null)
                         }
@@ -83,30 +83,94 @@ object NativeBridge {
                 // --- LUỒNG 4: LOAD PROJECT ---
                 "loadProject" -> {
                     val path = call.argument<String>("path") ?: return@setMethodCallHandler result.error("ERR", "", null)
-                    CoroutineScope(Dispatchers.Main).launch {
-                        val bytes = ImageProcessor.loadProjectToRAM(path)
+                    scope.launch {
+                        val bytes = withContext(Dispatchers.Default) {
+                            ImageProcessor.loadProjectToRAM(path)
+                        }
                         if (bytes != null) result.success(bytes) else result.error("ERR", "", null)
                     }
                 }
 
-                // --- LUỒNG 5: VẼ NÉT CỌ THÔNG MINH (SMART BRUSH) ---
+                // ===================================================================================
+                // NHÓM 5 TÍNH NĂNG VẼ (Đã được tách bạch rõ ràng)
+                // ===================================================================================
+
+                // [TÍNH NĂNG 1]: BÚT CHÌ (PENCIL)
+                "applyPencilStroke" -> {
+                    val points = call.argument<DoubleArray>("points") ?: return@setMethodCallHandler result.error("ERR", "Missing points", null)
+                    val color = call.argument<Long>("color")?.toInt() ?: 0
+                    val radius = call.argument<Double>("radius")?.toFloat() ?: 10f
+
+                    scope.launch {
+                        val success = withContext(Dispatchers.Default) {
+                            // Gọi đích danh hàm xử lý chì trong ImageProcessor
+                            ImageProcessor.applyPencil(points, color, radius)
+                        }
+                        result.success(success)
+                    }
+                }
+
+                // [TÍNH NĂNG 2]: TẨY (ERASER)
+                // Hoàn toàn không bóc tách tham số "color" vì tẩy làm trong suốt pixel
+                "applyEraserStroke" -> {
+                    val points = call.argument<DoubleArray>("points") ?: return@setMethodCallHandler result.error("ERR", "Missing points", null)
+                    val radius = call.argument<Double>("radius")?.toFloat() ?: 10f
+
+                    scope.launch {
+                        val success = withContext(Dispatchers.Default) {
+                            // Gọi đích danh hàm xử lý tẩy trong ImageProcessor
+                            ImageProcessor.applyEraser(points, radius)
+                        }
+                        result.success(success)
+                    }
+                }
+
+                // [TÍNH NĂNG 3]: CỌ THÔNG MINH (SMART BRUSH)
                 "applySmartBrush" -> {
-                    val points = call.argument<DoubleArray>("points") ?: return@setMethodCallHandler result.error("ERR", "", null)
+                    val points = call.argument<DoubleArray>("points") ?: return@setMethodCallHandler result.error("ERR", "Missing points", null)
                     val color = call.argument<Long>("color")?.toInt() ?: 0
                     val radius = call.argument<Double>("radius")?.toFloat() ?: 10f
                     val startX = call.argument<Int>("startX") ?: 0
                     val startY = call.argument<Int>("startY") ?: 0
-                    val isEraser = call.argument<Boolean>("isEraser") ?: false
 
-                    CoroutineScope(Dispatchers.Main).launch {
-                        // Hàm này sẽ trả về Mảng Byte của bức ảnh ĐÃ CẬP NHẬT
-                        val bytes = ImageProcessor.applySmartBrush(points, color, radius, startX, startY, isEraser)
-                        if (bytes != null) result.success(bytes) else result.error("ERR", "", null)
+                    scope.launch {
+                        val bytes = withContext(Dispatchers.Default) {
+                            ImageProcessor.applySmartBrush(points, color, radius, startX, startY)
+                        }
+                        if (bytes != null) result.success(bytes) else result.error("ERR", "Smart brush failed", null)
+                    }
+                }
+
+                // [TÍNH NĂNG 4]: THÙNG SƠN (FLOOD FILL)
+                "applyFloodFill" -> {
+                    val startX = call.argument<Int>("startX") ?: 0
+                    val startY = call.argument<Int>("startY") ?: 0
+                    val color = call.argument<Long>("color")?.toInt() ?: 0
+
+                    scope.launch {
+                        val bytes = withContext(Dispatchers.Default) {
+                            ImageProcessor.applyFloodFill(startX, startY, color)
+                        }
+                        if (bytes != null) result.success(bytes) else result.error("ERR", "Flood fill failed", null)
+                    }
+                }
+
+                // [TÍNH NĂNG 5]: BÌNH XỊT (SPRAY)
+                "applySpray" -> {
+                    val points = call.argument<DoubleArray>("points") ?: return@setMethodCallHandler result.error("ERR", "Missing points", null)
+                    val color = call.argument<Long>("color")?.toInt() ?: 0
+                    val radius = call.argument<Double>("radius")?.toFloat() ?: 10f
+                    val density = call.argument<Double>("density")?.toFloat() ?: 0.5f 
+
+                    scope.launch {
+                        val bytes = withContext(Dispatchers.Default) {
+                            ImageProcessor.applySpray(points, color, radius, density)
+                        }
+                        if (bytes != null) result.success(bytes) else result.error("ERR", "Spray failed", null)
                     }
                 }
                 
                 // --- LUỒNG NGOẠI LỆ ---
-                // Bắt trường hợp Flutter gọi sai tên method chưa được khai báo
                 else -> result.notImplemented()
             }
         }
