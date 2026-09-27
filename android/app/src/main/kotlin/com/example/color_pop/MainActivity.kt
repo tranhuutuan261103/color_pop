@@ -3,6 +3,7 @@ package com.example.color_pop
 import androidx.annotation.NonNull
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
+import com.example.color_pop.engine.NativeBridge
 
 /// [MainActivity]
 /// Điểm neo (Entry point) của ứng dụng trên hệ điều hành Android.

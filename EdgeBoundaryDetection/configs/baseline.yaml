@@ -1,0 +1,13 @@
+model: unet
+loss: bcedice
+learning_rate: 0.0003
+batch_size: 4
+image_size: 352
+epochs: 30
+patience: 10
+optimizer: adamw
+weight_decay: 1e-4
+scheduler: cosine
+bce_weight: 0.5
+dice_weight: 0.5
+threshold: 0.5

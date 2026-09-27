@@ -16,17 +16,17 @@ class WorkspaceAppBar extends StatelessWidget {
           _buildAppBarButton(
             context: context,
             icon: Icons.reply,
-            color: Colors.red[300]!,
+            color: Theme.of(context).iconTheme.color ?? Colors.red[300]!,
             onTap: () => Navigator.pop(context),
           ),
-          const Row(
+          Row(
             children: [
               Text(
                 'Sáng tạo: Kỳ lân ',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: Theme.of(context).textTheme.titleLarge?.color ?? Colors.black87,
                 ),
               ),
               Text('🎨', style: TextStyle(fontSize: 18)),
@@ -37,8 +37,8 @@ class WorkspaceAppBar extends StatelessWidget {
               _buildAppBarButton(
                 context: context,
                 icon: Icons.check,
-                color: Colors.white,
-                backgroundColor: Colors.green[400]!,
+                color: Theme.of(context).cardColor,
+                backgroundColor: Theme.of(context).primaryColor,
                 onTap: () async {
                   await controller.markAsCompleted();
                   if (context.mounted) {
@@ -53,7 +53,7 @@ class WorkspaceAppBar extends StatelessWidget {
               _buildAppBarButton(
                 context: context,
                 icon: Icons.block,
-                color: Colors.red[400]!,
+                color: Theme.of(context).colorScheme.error,
                 text: 'ADS',
                 onTap: () {},
               ),
@@ -81,7 +81,7 @@ class WorkspaceAppBar extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
+              color: Theme.of(context).shadowColor.withOpacity(0.05),
               blurRadius: 4,
             ),
           ],

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../home/cubit/home_cubit.dart';
 import '../../home/view/home_page.dart';
 import '../../library/view/library_screen.dart';
 import '../../profile/view/profile_screen.dart';
+import '../../creator/view/creator_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -19,36 +19,13 @@ class _MainScreenState extends State<MainScreen> {
   final List<Widget> _pages = [
     const HomePage(),        // Index 0: HomeTab
     const LibraryScreen(),   // Index 1: LibraryTab
-    const SizedBox.shrink(), // Index 2: Create (Action, not a screen)
+    const CreatorScreen(),   // Index 2: Create (Screen)
     const Center(child: Text('Khám phá')), // Index 3: Discover (Placeholder)
     const ProfileScreen(),   // Index 4: ProfileTab
   ];
 
-  Future<void> _pickImageAndNavigate() async {
-    final picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-    
-    // Kiểm tra 'mounted' để tránh crash nếu widget đã bị hủy
-    if (image != null && mounted) {
-      await Navigator.pushNamed(
-        context, 
-        '/workspace', 
-        arguments: image.path,
-      );
-      if (mounted) {
-        context.read<HomeCubit>().loadHomeData();
-      }
-    }
-  }
-
   // Xử lý logic khi bấm vào thanh điều hướng
   void _onBottomNavTapped(int index) {
-    if (index == 2) {
-      // Create tab triggers image picker directly
-      _pickImageAndNavigate();
-      return;
-    }
-    
     if (index == 0) {
       // Refresh home data when switching to home tab
       context.read<HomeCubit>().loadHomeData();

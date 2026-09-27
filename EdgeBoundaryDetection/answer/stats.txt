@@ -1,0 +1,4 @@
+Total Pixels: 30880200
+Total Edge Pixels: 1972517 (6.39%)
+Total Background Pixels: 28907683 (93.61%)
+Recommended positive weight for BCE: 14.66

@@ -104,7 +104,7 @@ class _LibraryGridCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 16,
             offset: const Offset(0, 4),
           ),
@@ -153,7 +153,7 @@ class _LibraryGridCard extends StatelessWidget {
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: Theme.of(context).cardColor.withOpacity(0.9),
+                color: Theme.of(context).cardColor.withValues(alpha: 0.9),
                 shape: BoxShape.circle,
               ),
               alignment: Alignment.center,
@@ -192,7 +192,7 @@ class _LibraryGridCard extends StatelessWidget {
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: Theme.of(context).primaryColor.withOpacity(0.5),
+                      color: Theme.of(context).primaryColor.withValues(alpha: 0.5),
                       blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),

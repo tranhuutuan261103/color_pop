@@ -15,13 +15,13 @@ class BottomToolbar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          const ToolbarButton(
+          ToolbarButton(
             icon: Icons.access_time,
-            iconColor: Colors.black87,
-            backgroundColor: Color(0xFFB3E5FC),
+            iconColor: Theme.of(context).iconTheme.color ?? Colors.black87,
+            backgroundColor: Theme.of(context).primaryColor.withOpacity(0.2),
           ),
-          const ToolbarButton(icon: Icons.colorize, iconColor: Colors.black87),
-          const Icon(Icons.chevron_left, color: Colors.grey, size: 30),
+          ToolbarButton(icon: Icons.colorize, iconColor: Theme.of(context).iconTheme.color ?? Colors.black87),
+          Icon(Icons.chevron_left, color: Theme.of(context).iconTheme.color?.withOpacity(0.5) ?? Colors.grey, size: 30),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
@@ -29,7 +29,7 @@ class BottomToolbar extends StatelessWidget {
               borderRadius: BorderRadius.circular(24),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
+                  color: Theme.of(context).shadowColor.withOpacity(0.05),
                   blurRadius: 4,
                 ),
               ],
@@ -83,14 +83,14 @@ class BottomToolbar extends StatelessWidget {
               ],
             ),
           ),
-          const Icon(Icons.chevron_right, color: Colors.grey, size: 30),
+          Icon(Icons.chevron_right, color: Theme.of(context).iconTheme.color?.withOpacity(0.5) ?? Colors.grey, size: 30),
           Container(
             width: 40,
             height: 40,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: Theme.of(context).cardColor,
-              border: Border.all(color: Colors.grey[300]!, width: 2),
+              border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.2), width: 2),
             ),
             child: Padding(
               padding: const EdgeInsets.all(4),

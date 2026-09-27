@@ -1,29 +1,125 @@
-# Miscellaneous
-*.class
-*.log
-*.pyc
-*.swp
-.DS_Store
-.atom/
-.build/
-.buildlog/
-.history
-.svn/
-.swiftpm/
-migrate_working_dir/
+# ===================================================
+# 1. Virtual Environments (Python / Conda / Virtualenv)
+# ===================================================
+venv/
+.venv/
+**/venv/
+**/.venv/
+env/
+**/env/
+.env/
+**/.env/
+ENV/
+build_venv/
+env.bak/
+venv.bak/
+conda/
+.conda/
+**/conda/
+**/.conda/
 
-# IntelliJ related
+# ===================================================
+# 2. AI / ML Model Weights, Checkpoints & Embeddings
+# ===================================================
+*.pt
+*.pth
+*.onnx
+*.onnx.data
+*.tflite
+*.pb
+*.pbtxt
+*.h5
+*.hdf5
+*.ckpt
+*.safetensors
+*.bin
+*.weights
+*.torchscript
+*.engine
+*.plan
+*.gguf
+*.joblib
+*.pkl
+*.pickle
+
+# Model & Training Output Directories
+checkpoints/
+**/checkpoints/
+saved_model/
+**/saved_model/
+saved_model_v2/
+**/saved_model_v2/
+experiments/
+**/experiments/
+runs/
+**/runs/
+wandb/
+**/wandb/
+
+# Datasets & Generated Visualizations (Heavy Files)
+dataset/
+**/dataset/
+datasets/
+**/datasets/
+visualization/
+**/visualization/
+temp_output/
+**/temp_output/
+
+# ===================================================
+# 3. Compiled Binaries & Native Libraries
+# ===================================================
+*.dll
+*.pyd
+*.so
+*.dylib
+*.exe
+
+# ===================================================
+# 4. Large Archives & Data Files
+# ===================================================
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.rar
+*.7z
+*.iso
+
+# ===================================================
+# 5. Python Cache & Logs
+# ===================================================
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+*.log
+*.log.*
+
+# ===================================================
+# 6. OS & IDE Configuration Files
+# ===================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# IDEs & Editors
+.vscode/
+.idea/
 *.iml
 *.ipr
 *.iws
-.idea/
+*.swp
+*.swo
 
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
-
-# Flutter/Dart/Pub related
+# ===================================================
+# 7. Flutter / Dart / Mobile Build Artifacts
+# ===================================================
 **/doc/api/
 **/ios/Flutter/.last_build_id
 .dart_tool/
@@ -33,13 +129,19 @@ migrate_working_dir/
 /build/
 /coverage/
 
-# Symbolication related
-app.*.symbols
-
-# Obfuscation related
-app.*.map.json
-
-# Android Studio will place build artifacts here
+# Android Studio & Local Properties
+android/local.properties
 /android/app/debug
 /android/app/profile
 /android/app/release
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# Symbolication & Obfuscation
+app.*.symbols
+app.*.map.json

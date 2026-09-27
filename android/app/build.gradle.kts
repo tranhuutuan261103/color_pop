@@ -10,6 +10,11 @@ android {
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
+
+    aaptOptions {
+        noCompress("tflite")
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -28,6 +33,12 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+
+        // Added to speed up OpenCV C++ compilation by limiting architectures
+        ndk {
+            abiFilters.add("arm64-v8a") // For physical devices
+            abiFilters.add("x86_64")    // For emulators
+        }
     }
 
     buildTypes {

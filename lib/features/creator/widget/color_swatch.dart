@@ -25,12 +25,12 @@ class ColorSwatchWidget extends StatelessWidget {
           shape: BoxShape.circle,
           color: color,
           border: isSelected
-              ? Border.all(color: Colors.white, width: 3)
-              : (isWhite ? Border.all(color: Colors.grey[300]!, width: 1) : null),
+              ? Border.all(color: Theme.of(context).primaryColor, width: 3)
+              : (isWhite ? Border.all(color: Theme.of(context).dividerColor, width: 1) : null),
           boxShadow: [
             if (isSelected)
               BoxShadow(
-                color: Colors.blue.withValues(alpha: 0.5),
+                color: Theme.of(context).primaryColor.withOpacity(0.5),
                 spreadRadius: 2,
                 blurRadius: 4,
               ),

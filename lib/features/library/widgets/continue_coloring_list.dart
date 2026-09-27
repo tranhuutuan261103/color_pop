@@ -15,7 +15,7 @@ class ContinueColoringList extends StatelessWidget {
             title: 'Gấu Teddy dễ thương',
             progress: 0.75,
             icon: '🧸',
-            bgColor: Theme.of(context).colorScheme.secondary.withOpacity(0.3),
+            bgColor: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.3),
             statusText: '⏸ Paused',
             statusBgColor: const Color(0xFFE8F5E9),
             statusTextColor: const Color(0xFF4CAF50),
@@ -25,7 +25,7 @@ class ContinueColoringList extends StatelessWidget {
             title: 'Kỳ lân giữa trời sao',
             progress: 0.30,
             icon: '🦄',
-            bgColor: Theme.of(context).primaryColor.withOpacity(0.2),
+            bgColor: Theme.of(context).primaryColor.withValues(alpha: 0.2),
             statusText: '▶ Bắt đầu',
             statusBgColor: const Color(0xFFFFF3E0),
             statusTextColor: const Color(0xFFFF9800),
@@ -65,7 +65,7 @@ class _ContinueCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 16,
             offset: const Offset(0, 4),
           ),

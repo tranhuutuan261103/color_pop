@@ -13,6 +13,7 @@ class ArtworkModel {
   final bool isHot;
   final bool isNew;
 
+  final String? cpopPath;
   final double progress;
 
   const ArtworkModel({
@@ -26,14 +27,28 @@ class ArtworkModel {
     this.isFavorite = false,
     this.isHot = false,
     this.isNew = false,
+    this.cpopPath,
     this.progress = 0,
   });
 
   factory ArtworkModel.fromJson(Map<String, dynamic> json) {
+    String imgPath = json["imagePath"];
+    
+    // Tự động suy luận cpopPath từ imagePath
+    // Ví dụ: assets/images/library/animals/cat.png -> assets/cpop/library/animals/cat.cpop
+    // Hoặc tạm thời lưu cùng thư mục: assets/images/library/animals/cat.cpop
+    // Nhưng vì mình sẽ tạo thư mục riêng là assets/cpop, nên thay chuỗi:
+    String cpop = imgPath.replaceAll('assets/images', 'assets/cpop');
+    int lastDot = cpop.lastIndexOf('.');
+    if (lastDot != -1) {
+      cpop = '${cpop.substring(0, lastDot)}.cpop';
+    }
+
     return ArtworkModel(
       id: json["id"],
       title: json["title"],
-      imagePath: json["imagePath"],
+      imagePath: imgPath,
+      cpopPath: cpop,
       category: json["category"],
       subCategory: json["subcategory"] ?? "",
       section: _detectSection(json["category"]),

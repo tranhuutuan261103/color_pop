@@ -50,6 +50,9 @@ dependencies:
   image_picker: ^1.2.3
   image: ^4.8.0
   gal: ^2.3.2
+  tflite_flutter: ^0.12.1
+  opencv_dart: ^2.2.2
+  http: ^1.2.0
 
 dev_dependencies:
   flutter_test:
@@ -73,8 +76,9 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
-  # To add assets to your application, add an assets section, like this:
   assets:
+    - assets/hed_mobile_v2_fp32.tflite
+    - assets/hed_mobile_quant.tflite
     - assets/fonts/
     - assets/icons/
     - assets/images/

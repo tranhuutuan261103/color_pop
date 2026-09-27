@@ -24,7 +24,10 @@ class ArtworkCard extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => WorkspaceScreen(imagePath: artwork.imagePath),
+            builder: (context) => WorkspaceScreen(
+              imagePath: artwork.imagePath,
+              cpopPath: artwork.cpopPath,
+            ),
           ),
         );
       },
@@ -35,7 +38,7 @@ class ArtworkCard extends StatelessWidget {
           // Tạo đổ bóng nhẹ cho card
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 16,
               offset: const Offset(0, 4),
             ),
@@ -64,7 +67,7 @@ class ArtworkCard extends StatelessWidget {
                         return Center(
                           child: Icon(
                             Icons.broken_image,
-                            color: Colors.grey.withOpacity(0.5),
+                            color: Colors.grey.withValues(alpha: 0.5),
                             size: 40,
                           ),
                         );
@@ -112,7 +115,7 @@ class ArtworkCard extends StatelessWidget {
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor.withOpacity(0.9),
+                  color: Theme.of(context).cardColor.withValues(alpha: 0.9),
                   shape: BoxShape.circle,
                 ),
                 alignment: Alignment.center,
