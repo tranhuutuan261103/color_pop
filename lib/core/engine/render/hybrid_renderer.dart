@@ -9,8 +9,13 @@ import 'dart:ui' as ui;
 class HybridRenderer extends CustomPainter {
   final ColorPopDocument document;
   final ui.Image? lineArtImage;
+  final bool showVectorOutline;
 
-  HybridRenderer(this.document, {this.lineArtImage});
+  HybridRenderer(
+    this.document, {
+    this.lineArtImage,
+    this.showVectorOutline = true,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -24,30 +29,42 @@ class HybridRenderer extends CustomPainter {
     // Split regions into paintable (background) and ink (foreground)
     final paintRegions = document.regions.where((r) => !r.isStroke).toList();
 
+    // 0. Nền ĐEN cơ sở cho toàn bộ hệ thống đường viền (Solid Black Inking Base):
+    // Biến toàn bộ khoảng hở và vùng viền stroke giữa các vùng tô màu thành MÀU ĐEN ĐẶC.
+    // Khi các vùng tô màu (Paint Regions) vẽ đè lên trên, khoảng viền xung quanh ảnh
+    // sẽ là màu đen thuần nhất, triệt tiêu 100% viền trắng không thể tô được!
+    final blackBasePaint = Paint()
+      ..style = PaintingStyle.fill
+      ..color = Colors.black;
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, document.width, document.height),
+      blackBasePaint,
+    );
+
     // 1. Render Paint Regions (Background areas and user colors)
     for (final region in paintRegions) {
       final path = _createPathForRegion(region);
 
-      // Draw base fill
-      final baseColor =
-          document.paintState.getRegionColor(region.id) ?? region.color;
+      final userColor = document.paintState.getRegionColor(region.id);
+      final baseColor = userColor ?? region.color;
       final paint = Paint()
         ..style = PaintingStyle.fill
         ..isAntiAlias = true
         ..color = baseColor;
       canvas.drawPath(path, paint);
 
-      // Mask dilation (Xử lý mặt nạ mở rộng vùng tô ôm sát mép trong của viền):
-      // Đảm bảo nét tô khớp hoàn toàn, ăn sâu 1.9px dưới chân viền đen,
-      // triệt tiêu tuyệt đối 100% mọi khe hở trắng nhỏ li ti xung quanh viền
-      final edgeFillPaint = Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 3.8
-        ..strokeCap = StrokeCap.round
-        ..strokeJoin = StrokeJoin.round
-        ..isAntiAlias = true
-        ..color = baseColor;
-      canvas.drawPath(path, edgeFillPaint);
+      // Mask dilation: Nếu người dùng đã tô màu vùng này, mở rộng nhẹ màu tô (3.0px)
+      // để màu ăn sâu dưới chân viền đen, triệt tiêu hoàn toàn khe hở giữa màu tô và viền.
+      if (userColor != null) {
+        final edgeFillPaint = Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 3.0
+          ..strokeCap = StrokeCap.round
+          ..strokeJoin = StrokeJoin.round
+          ..isAntiAlias = true
+          ..color = userColor;
+        canvas.drawPath(path, edgeFillPaint);
+      }
 
       // Draw freehand strokes (brush, pencil, spray, eraser) clipped to region
       final strokes = document.paintState.getStrokes(region.id);
@@ -90,7 +107,27 @@ class HybridRenderer extends CustomPainter {
       }
     }
 
-    // 2. Render Line Art Overlay: Phủ lớp viền đen lên trên với BlendMode.multiply
+    // 2. Lớp đệm viền vector (Viền của viền / Border Bridge):
+    // Vẽ đệm kín các mép bao vector, nằm NGAY DƯỚI lớp viền ảnh gốc (Line Art).
+    // Khi lớp viền Line Art phủ lên trên cùng, nó sẽ ép chặt toàn bộ viền vector vào đúng khuôn viền ảnh,
+    // triệt tiêu tuyệt đối mọi pixel trắng li ti mà không bị lòi nét ra ngoài.
+    if (showVectorOutline) {
+      final vectorOutlinePaint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.4
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round
+        ..isAntiAlias = true
+        ..color = Colors.black;
+
+      for (final region in paintRegions) {
+        final path = _createPathForRegion(region);
+        canvas.drawPath(path, vectorOutlinePaint);
+      }
+    }
+
+    // 3. Render Line Art Overlay: Phủ lớp viền ảnh gốc lên TRÊN CÙNG với BlendMode.multiply
+    // Giúp ép chặt và khóa gọn hoàn toàn đường viền vector vào dáng viền thật của ảnh
     if (lineArtImage != null) {
       final lineArtPaint = Paint()
         ..blendMode = BlendMode.multiply
@@ -104,23 +141,6 @@ class HybridRenderer extends CustomPainter {
       );
       final dstRect = Rect.fromLTWH(0, 0, document.width, document.height);
       canvas.drawImageRect(lineArtImage!, srcRect, dstRect, lineArtPaint);
-    }
-
-    // 3. Khử răng cưa sub-pixel và lấp đầy khoảng hở giữa đường bao và đường viền (Border Bridge):
-    // 3. Khử răng cưa sub-pixel và lấp đầy khoảng hở giữa đường bao và đường viền (Border Bridge):
-    // Nâng strokeWidth lên 2.8px (bán kính mở rộng 1.4px) giúp đường bao vươn khít hoàn toàn
-    // vào mép viền đen Line Art, xóa sạch 100% các pixel trắng li ti mà không làm dày nét chính.
-    final vectorOutlinePaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.1
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round
-      ..isAntiAlias = true
-      ..color = Colors.black;
-
-    for (final region in paintRegions) {
-      final path = _createPathForRegion(region);
-      canvas.drawPath(path, vectorOutlinePaint);
     }
   }
 
@@ -159,6 +179,8 @@ class HybridRenderer extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant HybridRenderer oldDelegate) {
-    return true;
+    return oldDelegate.document != document ||
+        oldDelegate.lineArtImage != lineArtImage ||
+        oldDelegate.showVectorOutline != showVectorOutline;
   }
 }

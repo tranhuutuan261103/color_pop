@@ -45,6 +45,9 @@ abstract class WorkspaceBaseState extends ChangeNotifier {
   // File cpop có sẵn từ Library (nếu có)
   final String? preProcessedCpopPath;
 
+  // Bật/tắt hiển thị "viền của viền" (Vector Outline / Border Bridge) để so sánh trực quan
+  bool showVectorOutline = true;
+
   // Ảnh Line Art (UI Image) dùng để render lớp viền sắc nét trên Canvas bằng BlendMode.multiply
   ui.Image? lineArtUiImage;
 

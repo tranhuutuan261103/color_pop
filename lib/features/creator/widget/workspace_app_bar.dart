@@ -34,6 +34,35 @@ class WorkspaceAppBar extends StatelessWidget {
           ),
           Row(
             children: [
+              // Nút Bật/Tắt "Viền của viền" (Vector Outline / Border Bridge) để so sánh
+              _buildAppBarButton(
+                context: context,
+                icon: controller.showVectorOutline
+                    ? Icons.line_weight
+                    : Icons.line_weight_outlined,
+                color: controller.showVectorOutline
+                    ? Theme.of(context).primaryColor
+                    : Colors.grey,
+                backgroundColor: controller.showVectorOutline
+                    ? Theme.of(context).primaryColor.withValues(alpha: 0.15)
+                    : Theme.of(context).cardColor,
+                onTap: () {
+                  controller.toggleVectorOutline();
+                  ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      duration: const Duration(milliseconds: 900),
+                      behavior: SnackBarBehavior.floating,
+                      content: Text(
+                        controller.showVectorOutline
+                            ? '✅ Đã BẬT viền của viền (Vector Outline)'
+                            : '❌ Đã TẮT viền của viền (Chỉ hiển thị viền AI)',
+                      ),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(width: 8),
               _buildAppBarButton(
                 context: context,
                 icon: Icons.check,
@@ -81,7 +110,7 @@ class WorkspaceAppBar extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Theme.of(context).shadowColor.withOpacity(0.05),
+              color: Theme.of(context).shadowColor.withValues(alpha: 0.05),
               blurRadius: 4,
             ),
           ],

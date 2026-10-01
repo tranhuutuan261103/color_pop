@@ -28,6 +28,11 @@ mixin WorkspaceUIHandler on WorkspaceBaseState {
     notifyListeners();
   }
 
+  void toggleVectorOutline() {
+    showVectorOutline = !showVectorOutline;
+    notifyListeners();
+  }
+
   void updateColor(int index) => selectColor(index);
   void updateTool(int index) => selectTool(index);
   void updateSlider(double value) => updateSliderValue(value);
